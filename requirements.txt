@@ -1,0 +1,15 @@
+torch>=2.2
+torchvision>=0.17
+
+fastapi>=0.110,<1
+uvicorn[standard]>=0.27,<1
+
+grpcio>=1.60.0
+grpcio-tools>=1.60.0
+protobuf>=4.25.0
+
+numpy>=1.24.0
+psutil>=5.9.0
+tensorboard>=2.13.0
+PyYAML>=6.0
+rich

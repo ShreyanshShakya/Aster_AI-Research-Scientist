@@ -1,0 +1,6 @@
+{
+  "managerAddress": "192.168.1.10:50051",
+  "advertiseIp": "192.168.1.10",
+  "glooInterface": "Wi-Fi",
+  "pythonPath": ".\\.venv\\Scripts\\python.exe"
+}

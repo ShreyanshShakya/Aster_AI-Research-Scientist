@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "bridgeEndpoint": "http://dmlf-bridge:8002",
+  "managerAddress": "dmlf-manager:50051",
+  "requestedNodes": 2,
+  "nodes": [
+    { "id": "dmlf-agent-1", "host": "dmlf-agent-1", "resource": "cpu", "processesPerNode": 1 },
+    { "id": "dmlf-agent-2", "host": "dmlf-agent-2", "resource": "cpu", "processesPerNode": 1 }
+  ]
+}

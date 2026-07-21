@@ -1,0 +1,13 @@
+{
+  "name": "distributed-ai-research-scientist",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Hackathon MVP for auditable, distributed ML research orchestration.",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
