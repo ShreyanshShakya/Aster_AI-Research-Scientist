@@ -8,30 +8,52 @@ This repository is deliberately scoped for a hackathon demo. It uses determinist
 
 ## Architecture
 
+The research application separates research planning from execution. Agents create inspectable artifacts and bounded experiment specifications; the scheduler dispatches those specifications to simulated, remote, or DMLF-backed workers.
+
+### Research workflow
+
 ```mermaid
-flowchart LR
-  U["Researcher\nquestion + budget"] --> UI["Web dashboard\nplan review + live timeline"]
-  UI --> ORCH["Research orchestrator\npersistent run manifest"]
-
-  ORCH --> LIT["Literature agent\npaper metadata + abstracts"]
-  LIT --> HYP["Hypothesis agent\nfalsifiable success criterion"]
-  HYP --> PLAN["Experiment planner + critic\nbounded allowlisted specs"]
-  PLAN --> SCHED["Capability-aware scheduler\nCPU / GPU / DMLF"]
-
-  SCHED --> SIM["Local simulated workers\no-key fallback"]
-  SCHED --> BRIDGE["DMLF async bridge\nPOST job -> job ID -> polling"]
-  BRIDGE --> MGR["DMLF cluster manager"]
-  MGR --> N1["Node agent A\nPyTorch DDP rank 0"]
-  MGR --> N2["Node agent B\nPyTorch DDP rank 1"]
-
-  SIM --> ANALYZE["Results analyst\nranking + repeated-seed stats"]
-  N1 --> ANALYZE
-  N2 --> ANALYZE
-  ANALYZE --> REPORT["Markdown report + manifest\nevidence labels + limitations"]
-  REPORT --> UI
+flowchart TD
+  R["Researcher"] --> UI["Dashboard"]
+  UI --> API["Node.js HTTP API"]
+  API --> O["Research orchestrator\nrun manifest + timeline"]
+  O --> L["Literature agent"]
+  L --> SRC["Semantic Scholar / OpenAlex\n+ offline fallback"]
+  L --> H["Hypothesis agent"]
+  H --> P["Experiment planner"]
+  P --> C["Plan critic\nbaseline + metric + controls"]
+  C --> G{"Human approval"}
+  G -->|Approved| S["Capability-aware scheduler"]
+  S --> SIM["Simulated workers"]
+  S --> REM["Remote worker adapter"]
+  S --> DMLF["DMLF worker adapter"]
+  SIM --> A["Result analysis"]
+  REM --> A
+  DMLF --> A
+  A --> REP["Markdown report + provenance manifest"]
+  REP --> UI
 ```
 
-The LLM-facing agents never receive shell access or credentials. They produce validated research-plan data; the scheduler and DMLF bridge execute only bounded experiment specifications.
+### DMLF execution integration
+
+```mermaid
+sequenceDiagram
+  participant A as Aster scheduler
+  participant B as DMLF HTTP bridge
+  participant M as DMLF manager
+  participant N as DMLF node agents
+  participant T as torchrun / PyTorch DDP
+  A->>B: POST /execute
+  B->>M: SubmitJob over gRPC
+  M->>N: Stream LaunchJob command
+  N->>T: Start distributed workers
+  T-->>N: Training result
+  N-->>M: Status and logs
+  B-->>A: jobId, polled progress and metrics
+```
+
+DMLF owns node discovery, allocation and distributed launch. Aster's bridge is an asynchronous adapter, not a second cluster scheduler. Simulated runs are labelled as simulated; synthetic DDP smoke tests validate execution but are not benchmark evidence.
+
 
 ## Demo in 60 seconds
 
